@@ -1,0 +1,22 @@
+\documentclass{article}
+\title{RASS 2002 Research Notes}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+<<>>=
+#trying to read the sav file
+#library(foreign)
+#RASS<-read.spss("RASS_2002.sav")
+#no luck
+#moving to CSV
+RASS<-read.csv("RASS_2002.csv")
+summary(RASS)
+@
+
+OK, that is a lot of variables.   Data cleaning is next step.  That means I will need to figure out which are 
+
+
+
+
+\end{document}
