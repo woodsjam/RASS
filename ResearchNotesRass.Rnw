@@ -3,6 +3,7 @@
 
 \begin{document}
 \SweaveOpts{concordance=TRUE}
+\maketitle
 
 <<>>=
 #trying to read the sav file
@@ -11,11 +12,103 @@
 #no luck
 #moving to CSV
 RASS<-read.csv("RASS_2002.csv")
-summary(RASS)
+#summary(RASS)
 @
 
-OK, that is a lot of variables.   Data cleaning is next step.  That means I will need to figure out which are 
+OK, that is a lot of variables.   Data cleaning is next step.  That means I will need to figure out which is which.
 
+First step is to deal with cleaning the proposed exogenous variables: income, ethnicity, education, and family structure (ages and size), and location.
+
+<<>>=
+#changeing these to factors.  I still need to know the numerical codes.
+
+summary(RASS$wt)  #The weight
+
+table(RASS$PTHMELOC) #location
+#change to factor
+RASS$PTHMELOC<-as.factor(RASS$PTHMELOC)
+summary(RASS$PTHMELOC)
+
+# Elminated in favor of edited income variable
+# summary(RASS$INCOME)#income
+# #change to factor
+# RASS$INCOME<-as.factor(RASS$INCOME)
+# summary(RASS$INCOME)
+
+#Prefered income variable
+summary(RASS$avginc)
+
+# HH size
+table(RASS$kids)
+table(RASS$adults) 
+table(RASS$seniors)
+#assuming 97 is the missing code for all
+RASS$kids[RASS$kids==97]<-NA
+RASS$adults[RASS$adults==97]<-NA
+RASS$seniors[RASS$seniors==97]<-NA
+
+#education.  Convert to factor but need code
+table(RASS$EDUC)
+RASS$EDUC<-as.factor(RASS$EDUC)
+RASS$EDUC[RASS$EDUC=='97']<-NA
+
+#Ethnicity variables
+summary(RASS$HOHIND1)
+RASS$HOHIND1[RASS$HOHIND1==97]<-NA
+RASS$HOHIND1<-as.logical(RASS$HOHIND1)
+
+summary(RASS$HOHASN1)
+RASS$HOHASN1[RASS$HOHASN1==97]<-NA
+RASS$HOHASN1<-as.logical(RASS$HOHASN1)
+
+summary(RASS$HOHBLK1)
+RASS$HOHBLK1[RASS$HOHBLK1==97]<-NA
+RASS$HOHBLK1<-as.logical(RASS$HOHBLK1)
+
+summary(RASS$HOHLAT1)
+RASS$HOHLAT1[RASS$HOHLAT1==97]<-NA
+RASS$HOHLAT1<-as.logical(RASS$HOHLAT1)
+
+summary(RASS$HOHWHT1)
+RASS$HOHWHT1[RASS$HOHWHT1==97]<-NA
+RASS$HOHWHT1<-as.logical(RASS$HOHWHT1)
+
+summary(RASS$HOHOTH1)
+RASS$HOHOTH1[RASS$HOHOTH1==97]<-NA
+RASS$HOHOTH1<-as.logical(RASS$HOHOTH1)
+
+@
+
+I need documentation on what PTHMELOC means but can go on without it. Can not go on without knowing what the EDUC codes mean.  ALEX PLEASE FIND
+
+Now to use these for tenure.  First get the own/rent and time on property variables ready.
+
+<<>>=
+#years in place.  Assumeing this is actual years.
+summary(RASS$YRS_RES)
+RASS$YRS_RES[RASS$YRS_RES==97]<-NA
+RASS$OWNRENT<-as.factor(RASS$OWNRENT)
+
+#need the codes for interpretation but one is own and other is rent.  
+summary(RASS$OWNRENT)
+RASS$OWNRENT[RASS$OWNRENT==97]<-NA
+RASS$OWNRENT<-as.factor(RASS$OWNRENT)
+@
+
+Still need to know what the YRS\_RES and OWNRENT codes mean. ALEX PLEASE FIND
+
+
+
+% Treat 
+% Use those and, probably location, to explain tenure, i.e., own/rent and time in the property. (logit and hazard)
+% 
+% Then use the tenure variables explain some of the basics of structure, single family, etc., (multinomial logit) and square footage (Regression).
+% 
+% At this point tenure, building structure and square footage as endogenous.
+% 
+% Then start using the square footage and building type, along with the other earlier variables, to work on appliance ownership and type. (Logit or multinomial logit as appropriate).  All those are then endogenous.
+% 
+% Finally, use the same demand model they do, but we have adjusted it for endogenaity of choices and the funny AR structure beyond AR1.
 
 
 
