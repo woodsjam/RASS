@@ -1,5 +1,6 @@
 \documentclass{article}
 \title{RASS 2002 Research Notes}
+\author{Woods}
 
 \begin{document}
 \SweaveOpts{concordance=TRUE}
@@ -95,9 +96,153 @@ RASS$OWNRENT[RASS$OWNRENT==97]<-NA
 RASS$OWNRENT<-as.factor(RASS$OWNRENT)
 @
 
-Still need to know what the YRS\_RES and OWNRENT codes mean. ALEX PLEASE FIND
+Still need to know what the YRS\_RES and OWNRENT codes mean. ALEX PLEASE FIND.  DONE June 20, 2012
 
 
+From Alex 
+OWNRENT: 1 = own ; 2 = rent
+EDUC; 1 = Elementary (grades 1-8) ; 2 = some high school (grades 9-12); 3 = high school graduate; 4 = some college/trade/vocational school; 5 = college graduate; 6 = postgraduate degree
+YRS_RES: 1=1 year or less; 2 = 2 years ; 3 = 3 years; 4 = 4 years; 5= 5 years; 6 = 6 years ; 7 = 7 years ; 8 = 8 years; 9 = 9 years; 10 = 10 years; 11 = 11 years; 12 = 12 years; 13 = 13 years; 14= 14 years; 15 = 15 years; 16 = 16-20 years; 17 = 21-30 years, 18 = greater than 30 years
+
+
+
+
+<<>>=
+library('car')
+summary(RASS$OWNRENT)
+RASS$OWNRENT<-recode(RASS$OWNRENT,"1='Own';2='Rent'")
+
+summary(RASS$EDUC)
+RASS$EDUC<-recode(RASS$EDUC, "1='Elementary';2='SomeHS'; 3='HS'; 4='SomeCollege'; 5='Bac'; 6='PostBac'")
+
+#creating a new scalar for the years resident.  I will use the same midpoint thing as in the report for the two ranges and 30 for the last category.
+
+RASS$YearsResident<-NA
+RASS$YearsResident[RASS$YRS_RES==1]<-1
+RASS$YearsResident[RASS$YRS_RES==2]<-2
+RASS$YearsResident[RASS$YRS_RES==3]<-3
+RASS$YearsResident[RASS$YRS_RES==4]<-4
+RASS$YearsResident[RASS$YRS_RES==5]<-5
+RASS$YearsResident[RASS$YRS_RES==6]<-6
+RASS$YearsResident[RASS$YRS_RES==7]<-7
+RASS$YearsResident[RASS$YRS_RES==8]<-8
+RASS$YearsResident[RASS$YRS_RES==9]<-9
+RASS$YearsResident[RASS$YRS_RES==10]<-10
+RASS$YearsResident[RASS$YRS_RES==11]<-11
+RASS$YearsResident[RASS$YRS_RES==12]<-12
+RASS$YearsResident[RASS$YRS_RES==13]<-13
+RASS$YearsResident[RASS$YRS_RES==14]<-14
+RASS$YearsResident[RASS$YRS_RES==15]<-15
+RASS$YearsResident[RASS$YRS_RES==16]<-18
+RASS$YearsResident[RASS$YRS_RES==17]<-25.5
+RASS$YearsResident[RASS$YRS_RES==18]<-30
+
+summary(RASS$YearsResident)
+
+#using the weather code as location  the other was for vaction
+RASS$cecfast<-as.factor(RASS$cecfast)
+summary(RASS$cecfast)
+@
+
+That should clean up the the variables for the first stage.
+
+<<>>=
+#making a logical for the model
+RASS$OWN<-NA
+RASS$OWN[RASS$OWNRENT=='Own']<-TRUE
+RASS$OWN[RASS$OWNRENT=='Rent']<-FALSE
+summary(RASS$OWN)
+
+Own1<-glm(OWN~avginc+kids+adults+seniors+EDUC+HOHIND1+HOHASN1+HOHBLK1+HOHLAT1+HOHWHT1+HOHOTH1, data=RASS, family=binomial(link="logit"), na.action=na.omit)
+summary(Own1)
+
+@
+
+First on scale, it looks like adults and kids are on the same scale.  Lets combine.
+
+<<>>=
+Own2<-glm(OWN~avginc+I(kids+adults)+seniors+EDUC+HOHIND1+HOHASN1+HOHBLK1+HOHLAT1+HOHWHT1+HOHOTH1, data=RASS, family=binomial(link="logit"), na.action=na.omit)
+
+summary(Own2)
+@
+
+Not much changed.  Keeping it.
+
+Time to work on income variable.  It is currently linea. That probably is not optimal.  Trying the usual log transform
+<<>>=
+BestOwn<-Own2
+
+Own3<-glm(OWN~log(avginc)+I(kids+adults)+seniors+EDUC+HOHIND1+HOHASN1+HOHBLK1+HOHLAT1+HOHWHT1+HOHOTH1, data=RASS, family=binomial(link="logit"), na.action=na.omit)
+summary(Own3)
+anova(BestOwn,Own3)
+@
+
+Dramatically smaller residual deviance.  Keeping the log transform.
+Now going to see if ethicity of HOH has interactive effects with income.
+
+<<>>=
+BestOwn<-Own3
+
+Own4<-glm(OWN~log(avginc)+I(kids+adults)+seniors+EDUC+log(avginc)*(HOHIND1+HOHASN1+HOHBLK1+HOHLAT1+HOHWHT1+HOHOTH1), data=RASS, family=binomial(link="logit"), na.action=na.omit)
+
+summary(Own4)
+@
+
+Looks like there is a strong amarind efect with incomethat is opposite of the intercept effect.  Simmilar pattern for all but wt.  Using this as base.  Hmmm...should recode ethnicity of HOH.
+
+<<>>=
+RASS$Ethnicity<-NA
+RASS$Ethnicity[RASS$HOHIND1==TRUE]<-'AmerInd'
+RASS$Ethnicity[RASS$HOHASN1==TRUE]<-'Asian'
+RASS$Ethnicity[RASS$HOHBLK1==TRUE]<-'Black'
+RASS$Ethnicity[RASS$HOHLAT1==TRUE]<-'Latino'
+RASS$Ethnicity[RASS$HOHWHT1==TRUE]<-'White'
+RASS$Ethnicity[RASS$HOHOTH1==TRUE]<-'Other'
+RASS$Ethnicity<-as.factor(RASS$Ethnicity)
+
+#making sure White is the deleted case.
+RASS$Ethnicity<-factor(RASS$Ethnicity, levels=c('White','AmerInd','Asian','Black','Latino','Other'))
+
+summary(RASS$Ethnicity)
+
+Own4<-glm(OWN~log(avginc)+I(kids+adults)+seniors+EDUC+log(avginc)*(Ethnicity), data=RASS, family=binomial(link="logit"), na.action=na.omit)
+summary(Own4)
+
+#recoding the baset case to same variable system
+BestOwn<-glm(OWN~log(avginc)+I(kids+adults)+seniors+EDUC+Ethnicity, data=RASS, family=binomial(link="logit"), na.action=na.omit)
+summary(BestOwn)
+
+anova(BestOwn,Own4)
+@
+
+Ok that produced some puzzels when I crossed with the log of income but little difference in prediction.  The short is that all that everyone is less likely to own that white.
+
+Sticking with the current best. 
+
+Looking at the education part.  What is odd is that Bac is the residual category and everyone is more likely to own than them.  Student loans?  Lets check for an income interaction.
+
+<<>>=
+Own5<-glm(OWN~I(kids+adults)+seniors+log(avginc)*EDUC+Ethnicity, data=RASS, family=binomial(link="logit"), na.action=na.omit)
+
+summary(Own5)
+@
+Thats not it.  Maybe HH size?
+
+<<>>=
+Own6<-glm(OWN~log(avginc)+I(kids+adults)*EDUC+seniors+Ethnicity, data=RASS, family=binomial(link="logit"), na.action=na.omit)
+summary(Own6)
+
+anova(BestOwn,Own6)
+@
+
+Thats it.  See how the grown in family size by education undoes the family size parameter.  That is it. HUGE.  Making this the best now
+
+<<>>=
+
+BestOwn<-Own6
+@
+
+Calling it quits on ownership and going to tenure.
 
 % Treat 
 % Use those and, probably location, to explain tenure, i.e., own/rent and time in the property. (logit and hazard)
