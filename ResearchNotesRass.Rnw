@@ -240,9 +240,30 @@ Thats it.  See how the grown in family size by education undoes the family size 
 <<>>=
 
 BestOwn<-Own6
-@
 
-Calling it quits on ownership and going to tenure.
+#cleaning up namespace
+rm('Own1')
+rm('Own2')
+rm('Own3')
+rm('Own4')
+rm('Own5')
+rm('Own6')
+
+@
+Lets add location to model
+
+<<>>=
+OwnLoc<-glm(OWN~cecfast*(log(avginc)+I(kids+adults)*EDUC+seniors+Ethnicity), data=RASS, family=binomial(link="logit"), na.action=na.omit)
+summary(OwnLoc)
+
+anova(BestOwn,OwnLoc, test='Chisq')
+
+@
+Looks like location really matters, but that nothing in the regression is.
+
+Well, that means that location is correlated with ethnicity family structure and all that other stuff. Looks like we need another model.  We have to describe locational choice based on some of those observable factors. 
+
+
 
 % Treat 
 % Use those and, probably location, to explain tenure, i.e., own/rent and time in the property. (logit and hazard)
