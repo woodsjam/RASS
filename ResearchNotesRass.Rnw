@@ -261,8 +261,49 @@ anova(BestOwn,OwnLoc, test='Chisq')
 @
 Looks like location really matters, but that nothing in the regression is.
 
-Well, that means that location is correlated with ethnicity family structure and all that other stuff. Looks like we need another model.  We have to describe locational choice based on some of those observable factors. 
+Well, that means that location is correlated with ethnicity family structure and all that other stuff. Looks like we need another model.  We may have to describe locational choice based on some of those observable factors. 
 
+Alternatly, and I like this alternative better, just think of this as the instrument model for later regressions.
+
+Lets get the ownership probabilities attached to the RASS data and compare.
+<<>>=
+RASS$OwnProb<-predict(OwnLoc,newdata=RASS, type='response')
+summary(RASS$OWN)
+summary(OwnProb)
+15792/(15792+5772)
+@
+They have the same mean.  Please note that this is very skewed towards ownership.  The mode is at about .9 for owning.  That is the nature of our sample.
+
+\section{Type, Size and How long}
+
+Moving on to dwelling type.  Have to do some recode
+<<>>=
+RASS$DWLTYPE<-as.factor(RASS$DWLTYPE)
+@
+
+
+From the documentation.
+
+<<>>=
+RASS$StructType<-NA
+RASS$StructType[RASS$DWLTYPE==1]<-'SF'
+RASS$StructType[RASS$DWLTYPE==2]<-'Townhouse'
+RASS$StructType[RASS$DWLTYPE==3]<-'SmallMF'
+RASS$StructType[RASS$DWLTYPE==4]<-'LargeMF'
+RASS$StructType[RASS$DWLTYPE==5]<-'Mobile'
+RASS$StructType[RASS$DWLTYPE==6]<-'Other'
+RASS$StructType<-as.factor(RASS$StructType)
+summary(RASS$StructType)
+@
+
+Lets get modeling
+
+<<>>=
+library('mlogit')
+RASSmlogit<-mlogit.data(data=RASS, choice='StructType')
+StructModel<-mlogit(StructType~0|log(avginc), data=RASSmlogit)
+
+@
 
 
 % Treat 
