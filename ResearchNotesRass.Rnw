@@ -1,6 +1,6 @@
 \documentclass{article}
 \title{RASS 2002 Research Notes}
-\author{Woods}
+\author{James Woods}
 
 \begin{document}
 \SweaveOpts{concordance=TRUE}
