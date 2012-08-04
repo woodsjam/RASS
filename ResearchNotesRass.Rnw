@@ -98,12 +98,12 @@ RASS$OWNRENT<-as.factor(RASS$OWNRENT)
 
 Still need to know what the YRS\_RES and OWNRENT codes mean. ALEX PLEASE FIND.  DONE June 20, 2012
 
-
+\begin{verbatim}
 From Alex 
 OWNRENT: 1 = own ; 2 = rent
 EDUC; 1 = Elementary (grades 1-8) ; 2 = some high school (grades 9-12); 3 = high school graduate; 4 = some college/trade/vocational school; 5 = college graduate; 6 = postgraduate degree
 YRS_RES: 1=1 year or less; 2 = 2 years ; 3 = 3 years; 4 = 4 years; 5= 5 years; 6 = 6 years ; 7 = 7 years ; 8 = 8 years; 9 = 9 years; 10 = 10 years; 11 = 11 years; 12 = 12 years; 13 = 13 years; 14= 14 years; 15 = 15 years; 16 = 16-20 years; 17 = 21-30 years, 18 = greater than 30 years
-
+\end{verbatim}
 
 
 
