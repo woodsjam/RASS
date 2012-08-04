@@ -296,15 +296,14 @@ RASS$StructType<-as.factor(RASS$StructType)
 summary(RASS$StructType)
 @
 
-Lets get modeling
+Lets get modeling.  Keeping this as simple as possible but stil identifiable.
 
 <<>>=
 library('mlogit')
 RASSmlogit<-mlogit.data(data=RASS, choice='StructType')
-StructModel<-mlogit(StructType~0|log(avginc), data=RASSmlogit)
-
+StructModel<-mlogit(StructType~0|cecfast*(OwnProb+log(avginc)+YRS_RES), data=RASSmlogit)
+summary(StructModel)
 @
-
 
 % Treat 
 % Use those and, probably location, to explain tenure, i.e., own/rent and time in the property. (logit and hazard)
